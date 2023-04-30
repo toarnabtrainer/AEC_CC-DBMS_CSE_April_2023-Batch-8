@@ -13,3 +13,20 @@
 **Advanced Learning Resource:** https://certifications.codechef.com/data-structures-and-algorithms/prepare/advanced-level
 
 **Notepad Link:** https://notepad.pw/2BPTZJKld9UOuICy2h52
+
+**Programming Assignment - 1 (10 Minutes)**<br>
+Print the following pattern for user given ODD value for n.<br>
+For n = 11<br>
+<pre>
+***********
+.*********
+..*******
+...*****
+....***
+.....*
+....***
+...*****
+..*******
+.*********
+***********
+</pre>
