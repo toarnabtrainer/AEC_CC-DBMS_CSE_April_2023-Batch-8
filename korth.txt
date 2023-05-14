@@ -1,0 +1,526 @@
+Schemas -
+employee (employee-name, street, city)
+works (employee-name, company-name, salary)
+company (company-name, city)
+manages (employee-name, manager-name)
+
+--korth exercise 4.2 solve 
+
+drop table manages;
+
+create table manages
+  (
+   employee_name varchar(20),
+   manager_name varchar(20)
+  );
+
+insert into manages
+  values('ashoke','dilip');
+insert into manages
+  values('sanjay','dilip');
+insert into manages
+  values('rakesh','karim');
+insert into manages
+  values('manoj','pranab');
+insert into manages
+  values('salim','karim');
+insert into manages
+  values('sayan','pranab');
+insert into manages
+  values('rajib','pranab');
+
+select * from manages;
+
+desc manages;
+-- pragma table_info('manages') -- in Sqlite
+--********************************************
+
+drop table company;
+
+create table company
+  (
+   company_name varchar(20),
+   city varchar(5)
+  );
+
+insert into company
+  values('satyam','mum');
+insert into company
+  values('satyam','del');
+insert into company
+  values('aol','cal');
+insert into company
+  values('vsnl','del');
+
+select * from company;
+
+desc company;
+
+--********************************************
+
+drop table works;
+
+create table works
+  (
+   employee_name varchar(20),
+   company_name varchar(20),
+   salary integer
+  );
+
+insert into works
+  values('rakesh','satyam',8000);
+insert into works
+  values('rajib','aol',15000);
+insert into works
+  values('manoj','aol',10000);
+insert into works
+  values('pranab','aol',50000);
+insert into works
+  values('karim','satyam',35000);
+insert into works
+  values('salim','satyam',6000);
+insert into works
+  values('sayan','aol',20000);
+insert into works
+  values('dilip','vsnl',35000);
+insert into works
+  values('ashoke','vsnl',13000);
+insert into works
+  values('sanjay','vsnl',30000);
+
+select * from works;
+
+desc works;
+
+--********************************************
+
+drop table employee;
+
+create table employee
+  (
+   employee_name varchar(20),
+   street varchar(6),
+   city varchar(5)
+  );
+
+insert into employee
+  values('ashoke','vip','cal');
+insert into employee
+  values('sanjay','gt','mum');
+insert into employee
+  values('rakesh','bt','cal');
+insert into employee
+  values('dilip','vip','cal');
+insert into employee
+  values('manoj','gt','del');
+insert into employee
+  values('pranab','vip','cal');
+insert into employee
+  values('salim','vip','del');
+insert into employee
+  values('karim','bt','mum');
+insert into employee
+  values('sayan','gt','cal');
+insert into employee
+  values('rajib','vip','mum');
+
+select * from employee;
+
+desc employee;
+
+--********************************************
+--Question A: Find the names of all employees who work for VSNL.
+--Question B: Find the names and cities of residents of all employees who work for VSNL.
+--Question C: Find the names, street address, cities of residents of all employees who work for AOL and earn more than 20,000.
+--Question D: Find all employees in the database who live in the same cities as the companies for which they work.
+--Question E: Find all employees in the database who live in the same cities and in the same streets as do their managers.
+--Question F: Find all employee in the database who do not work for VSNL.
+--Question G: Find all the employee in the database who earn more than every employee of satyam.
+--Question H: Assume that the companies may be located in several cities. Find all companies located in every city in which vsnl is located.
+--Question I: Find all employees who earn more than the average salary of all employees of their company.
+--Question J: Find the company that has the most number of employees.
+--Question K: Find the company that has the smallest payroll.
+--Question L: Find those companies whose employees earn higher salary,on average, than the average salary of the satyam.
+--********************************************
+
+--Question A:
+-------------
+--Find the names of all employees who work for 
+--VSNL.
+
+--SQL Statement:
+----------------
+select employee_name 
+from works
+where company_name='vsnl';
+
+--Output :
+----------
+--EMPLOYEE_NAME
+----------------------
+--dilip
+--ashoke
+--sanjay
+
+--********************************************
+
+--Question B:
+-------------
+--Find the names and cities of residents of all 
+--employees who work for VSNL.
+
+--SQL Statement:
+----------------
+select employee.employee_name,city
+from employee,works
+where employee.employee_name=works.employee_name
+  and company_name='vsnl';
+
+select employee_name,city
+from employee
+where employee_name in 
+  (select employee_name
+   from works
+   where company_name='vsnl');
+
+--Output :
+----------
+--EMPLOYEE_NAME        CITY
+---------------------- -----
+--ashoke               cal
+--dilip                cal
+--sanjay               mum
+
+--********************************************
+
+--Question C:
+-------------
+--Find the names, street address, cities of 
+--residents of all employees who work for AOL
+--and earn more than 20,000.
+
+--SQL Statement:
+----------------
+select employee.employee_name,street,city
+from employee,works
+where employee.employee_name=works.employee_name
+  and company_name='aol'
+  and salary>20000;
+
+--Output :
+----------
+--EMPLOYEE_NAME        STREET CITY
+---------------------- ------ -----
+--pranab               vip    cal
+
+--********************************************
+
+--Question D:
+-------------
+--Find all employees in the database who live in 
+--the same cities as the companies for which they 
+--work.
+
+--SQL Statement:
+----------------
+select distinct employee.employee_name 
+from employee,company,works
+where employee.city=company.city
+  and works.company_name=company.company_name
+  and works.employee_name=employee.employee_name;
+
+select employee.employee_name
+from employee,works
+where employee.employee_name=works.employee_name
+  and (company_name,city) in
+  (select works.company_name,city
+   from works,company
+   where works.company_name=company.company_name);
+
+--Output :
+----------
+--EMPLOYEE_NAME
+----------------------
+--karim
+--pranab
+--salim
+--sayan
+
+--********************************************
+
+--Question E:
+-------------
+--Find all employees in the database who live in
+--the same cities and in the same streets as do 
+--their managers.
+
+--SQL Statement:
+----------------
+select emp.employee_name
+from employee emp,employee man
+where emp.street=man.street
+  and emp.city=man.city
+  and (emp.employee_name,man.employee_name) in
+  (select * from manages);
+
+select employee_name
+from employee e
+where employee_name in
+  (select e.employee_name
+   from manages m,employee e1
+   where e.employee_name=m.employee_name
+     and e1.employee_name=m.manager_name
+     and e.street=e1.street
+     and e.city=e1.city);
+   
+select e.employee_name   
+from employee e,manages m
+where e.employee_name=m.employee_name
+  and e.employee_name in
+  (select e.employee_name
+   from employee emp,manages man
+   where emp.employee_name=man.manager_name
+     and emp.city=e.city
+     and emp.street=e.street);
+
+select e.employee_name 
+from employee e,employee emp,manages m
+where e.employee_name=m.employee_name
+  and emp.employee_name=m.manager_name
+  and emp.city=e.city
+  and emp.street=e.street;
+
+select employee_name 
+from employee
+where (street,city,employee_name) in
+  (select street,city,m.employee_name
+   from employee e,manages m
+   where e.employee_name=m.manager_name);
+
+--Output :
+----------
+--EMPLOYEE_NAME
+----------------------
+--ashoke
+
+--********************************************
+
+--Question F:
+-------------
+--Find all employee in the database who do not
+--work for VSNL.
+
+--SQL Statement:
+----------------
+select employee_name
+from works
+where company_name<>'vsnl';
+
+(select employee_name
+from works)
+minus
+(select employee_name
+from works
+where company_name='vsnl');
+
+--Output :
+----------
+--EMPLOYEE_NAME
+----------------------
+--rakesh
+--rajib
+--manoj
+--pranab
+--karim
+--salim
+--sayan
+
+--7 rows selected.
+
+--********************************************
+
+--Question G:
+-------------
+--Find all the employee in the database who earn 
+--more than every employee of satyam.
+
+--SQL Statement:
+----------------
+select employee_name 
+from works
+where salary > all
+  (select salary
+   from works
+   where company_name='satyam');
+
+select employee_name 
+from works
+where salary > 
+  (select max(salary)
+   from works
+   where company_name='satyam');
+
+--Output :
+----------
+--EMPLOYEE_NAME
+----------------------
+--pranab
+
+--********************************************
+
+--Question H:
+-------------
+--Assume that the companies may be located in 
+--several cities. Find all companies located in 
+--every city in which vsnl is located.
+
+--SQL Statement:
+----------------
+select distinct company_name
+from company c
+where not exists 
+  ((select city 
+    from company
+    where company_name='vsnl')
+   minus
+   (select city 
+    from company	
+    where company.company_name=c.company_name
+      and company.company_name<>'vsnl')); 
+
+--Output :
+----------
+--COMPANY_NAME
+----------------------
+--satyam
+
+--********************************************
+
+--Question I:
+-------------
+--Find all employees who earn more than the 
+--average salary of all employees of their 
+--company.
+
+--SQL Statement:
+----------------
+select employee.employee_name
+from employee,works
+where employee.employee_name=works.employee_name
+  and works.salary > all
+  (select avg(salary)
+   from works
+   group by company_name);
+
+select employee_name 
+from works w
+where salary > all
+  (select avg(salary) 
+   from works
+   where w.company_name=works.company_name
+   group by company_name);
+
+select employee_name 
+from works,(select company_name,avg(salary) s
+            from works
+	    group by company_name) w
+where works.company_name=w.company_name
+  and works.salary>s;
+
+--Output :
+----------
+--EMPLOYEE_NAME
+----------------------
+--dilip
+--karim
+--pranab
+--sanjay
+
+--********************************************
+
+--Question J:
+-------------
+--Find the company that has the most number of 
+--employees.
+
+--SQL Statement:
+----------------
+select company_name
+from works
+group by company_name
+having count(*) = 
+  (select max(count(*))
+   from works
+   group by company_name);
+
+select company_name
+from works
+group by company_name
+having count(employee_name) >= all
+  (select count(employee_name)
+   from works
+   group by company_name);
+
+--Output :
+----------
+--COMPANY_NAME
+----------------------
+--aol
+
+--********************************************
+
+--Question K:
+-------------
+--Find the company that has the smallest payroll.
+
+--SQL Statement:
+----------------
+select company_name
+from works
+group by company_name 
+having sum(salary)=
+  (select min(sum(salary))
+   from works
+   group by company_name);
+
+select company_name
+from works
+group by company_name
+having sum(salary)<= all
+  (select sum(salary)
+   from works
+   group by company_name);
+
+--Output :
+----------
+--COMPANY_NAME
+----------------------
+--satyam
+
+--********************************************
+
+--Question L:
+-------------
+--Find those companies whose employees earn
+--higher salary,on average, than the average
+--salary of the satyam.
+
+--SQL Statement:
+----------------
+select company_name
+from works
+group by company_name 
+having avg(salary)>
+(select avg(salary)
+from works
+where company_name='satyam');
+
+--Output :
+----------
+--COMPANY_NAME
+--------------------
+--aol
+--vsnl
+
+--********************************************
+
